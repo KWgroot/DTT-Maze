@@ -18,6 +18,12 @@ public class MazeGenerator : MonoBehaviour
 
     private void Start()
     {
+        //We already know the width and height, adjust camera to the middle position.
+        Camera cam = Camera.main;
+        cam.transform.position = new Vector3(width/2f - 0.5f, 2, height /2f - 0.5f); //The actual height is not important as 
+        //And adjust the size of the view.                                           //the cam is set to ortographic.
+        cam.orthographicSize = Mathf.Max(width / 3.8f, height / 1.9f);
+
         //Fill the grid so it can be used
         grid = new Cell[width, height];
 
