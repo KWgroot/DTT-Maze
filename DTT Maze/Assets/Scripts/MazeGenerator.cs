@@ -18,6 +18,9 @@ public class MazeGenerator : MonoBehaviour
 
     private List<GameObject> mazeObjects = new List<GameObject>();
 
+    //250x250 is insanely huge, doesn't seem right?
+    //Any setting where width or height exceeds 100 have no animations, only finished maze.
+
     private void Start()
     {
         //We already know the width and height, adjust camera to the middle position.
@@ -38,11 +41,19 @@ public class MazeGenerator : MonoBehaviour
                 //As I find all the cells in the hierarchy chaotic add them to child object named Maze.
                 grid[w, h].transform.parent = gameObject.transform.GetChild(0);
 
+                //Either 3d or 2d maze objects are now batched through this collection.
                 foreach(Transform child in grid[w, h].transform)
                     mazeObjects.Add(child.gameObject);
             }
         }
-
+        //Batch static objects at runtime.
         StaticBatchingUtility.Combine(mazeObjects.ToArray(), transform.GetChild(0).gameObject);
+
+
+        //For optimization reasons this will be done at the end.
+        foreach(Cell cell in grid)
+        {
+            Destroy(cell.GetComponent<Cell>());
+        }
     }
 }
