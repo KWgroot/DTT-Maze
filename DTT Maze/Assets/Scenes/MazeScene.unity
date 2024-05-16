@@ -604,8 +604,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 1265302758358360682, guid: 842d793fc71ec4946853696b7f4aa910,
     type: 3}
-  width: 36
-  height: 37
+  width: 134
+  height: 66
 --- !u!4 &1734608210
 Transform:
   m_ObjectHideFlags: 0

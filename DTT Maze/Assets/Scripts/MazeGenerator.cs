@@ -16,6 +16,8 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField]
     private Cell[,] grid;
 
+    private List<GameObject> mazeObjects = new List<GameObject>();
+
     private void Start()
     {
         //We already know the width and height, adjust camera to the middle position.
@@ -35,7 +37,12 @@ public class MazeGenerator : MonoBehaviour
                 grid[w, h] = Instantiate(cellPrefab, new Vector3(w, 0, h), Quaternion.identity);
                 //As I find all the cells in the hierarchy chaotic add them to child object named Maze.
                 grid[w, h].transform.parent = gameObject.transform.GetChild(0);
+
+                foreach (Transform child in grid[w, h].transform)
+                    mazeObjects.Add(child.gameObject);
             }
         }
+
+        StaticBatchingUtility.Combine(mazeObjects.ToArray(), transform.GetChild(0).gameObject);
     }
 }
