@@ -34,11 +34,11 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int h = 0; h < height; h++)
             {
-                grid[w, h] = Instantiate(cellPrefab, new Vector3(w, 0, h), Quaternion.identity);
+                grid[w, h] = Instantiate(cellPrefab, new Vector3(w, 0, h), cellPrefab.transform.rotation);
                 //As I find all the cells in the hierarchy chaotic add them to child object named Maze.
                 grid[w, h].transform.parent = gameObject.transform.GetChild(0);
 
-                foreach (Transform child in grid[w, h].transform)
+                foreach(Transform child in grid[w, h].transform)
                     mazeObjects.Add(child.gameObject);
             }
         }
