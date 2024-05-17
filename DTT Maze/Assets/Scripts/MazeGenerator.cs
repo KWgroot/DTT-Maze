@@ -19,6 +19,8 @@ public class MazeGenerator : MonoBehaviour
     private GameObject wallsParent;
     private Vector3 startPos, currentPos;
     private Camera mainCam;
+    private Cell[] cells;
+    private int cellsVisited = 0;
 
     const float WALLLENGTH = 1f;
 
@@ -29,10 +31,7 @@ public class MazeGenerator : MonoBehaviour
 
         //Fix the camera position
         mainCam = Camera.main;
-        if (Mathf.Max(mazeHeight, mazeWidth) == mazeHeight)
-            mainCam.orthographicSize = mazeHeight / 1.9f;
-        else
-            mainCam.orthographicSize = mazeWidth / 3.5f;
+        mainCam.orthographicSize = mazeHeight / 1.9f;
 
         CreateWalls();
     }
@@ -70,11 +69,23 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        cellFinder.FindCells(wallsParent, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
+        cells = cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }
     
     public void CreateMaze()
     {
+        /*do
+        {
+            if (cellsVisited == 0)
+            {
+                
+            }
+            else
+            {
 
+            }
+
+        }
+        while (cellsVisited < mazeHeight * mazeWidth);*/
     }
 }

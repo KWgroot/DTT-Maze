@@ -580,6 +580,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1734608210}
   - component: {fileID: 1734608211}
+  - component: {fileID: 1734608212}
   m_Layer: 0
   m_Name: Maze Generator
   m_TagString: Untagged
@@ -617,8 +618,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallPrefab: {fileID: 1545852185676393056, guid: b2159d4b5cd64794086fcebe3844f3d2,
     type: 3}
-  mazeHeight: 18
-  mazeWidth: 60
+  mazeHeight: 92
+  mazeWidth: 154
+  cellFinder: {fileID: 1734608212}
+--- !u!114 &1734608212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1734608208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c22a85f81317054c9c35cbaedf83f82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mazeGenerator: {fileID: 1734608211}
+  cells: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

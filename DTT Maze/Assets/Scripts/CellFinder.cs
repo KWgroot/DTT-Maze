@@ -9,14 +9,13 @@ public class CellFinder : MonoBehaviour
     /// </summary>
 
     [SerializeField] private MazeGenerator mazeGenerator;
+    [SerializeField] private Cell[] cells;
 
-    [SerializeField]
-    private Cell[] cells;
     private GameObject[] walls;
     private int rowCount = 0, childCount = 0;
 
     //We will receive the gameobject that houses all walls for the maze and the amount of cells we expect to find.
-    public void FindCells(GameObject wallsParent, int cellAmount, int mazeHeight, int mazeWidth)
+    public Cell[] FindCells(Transform wallsParent, int cellAmount, int mazeHeight, int mazeWidth)
     {
         cells = new Cell[cellAmount];
         walls = new GameObject[wallsParent.transform.childCount];
@@ -28,26 +27,37 @@ public class CellFinder : MonoBehaviour
         }
 
         //Then the hard part, considering we are building from southwest to northeast that's how the cells are searched for.
-        //To the current cell assign west and south, then go to the next child which should be the vertical wall
-        //and give the remaining two walls to this cell and then continue this until all cells are found.
-        for (int i = 0; i < mazeHeight - 1; i++)
-        {
-            //Realized in my current setup I would loop once too many, this prevents that possibilty entirely.
-            if (i >= cells.Length || rowCount >= walls.Length)
-                break;
+        int eastWestWalls = 0;      //we will check one side wall at a time, and considering the order the cells are stored in
+        int northSouthWalls = 0;    //it is required to use a small increment in the middle between each side wall.
+        int rowCount = 0;           //we check row by row and with this we can increment what row we're looking at
+        int cellProgress = 0;       //check the cell number we're looking for
 
-            cells[i].westWall = walls[rowCount];
-            cells[i].southWall = walls[childCount + (mazeHeight + 1) * mazeWidth];
+        for (int i = 0; i < mazeHeight; i++)
+        {            
+            cells[cellProgress] = new Cell();
 
-            childCount++;
+            cells[cellProgress].westWall = walls[eastWestWalls];
+            cells[cellProgress].southWall = walls[northSouthWalls + (mazeHeight + 1) * mazeWidth];
 
-            cells[i].northWall = walls[childCount + (mazeHeight + 1) * mazeWidth + mazeHeight - 1];
+            northSouthWalls++;
+            eastWestWalls++;
+
+            cells[cellProgress].northWall = walls[northSouthWalls + (mazeHeight + 1) * mazeWidth + mazeHeight - 1];
+            cells[cellProgress].eastWall = walls[eastWestWalls];
 
             rowCount++;
+            cellProgress++;         //Next cell or row depending if we've reached the end of this row
 
-            cells[i].eastWall = walls[rowCount];
+            if (rowCount == mazeHeight && cellProgress < cells.Length)
+            {
+                //if we did reach the end of the row, start from it's beginning point
+                eastWestWalls++;
+                rowCount = 0;
+                i = -1;
+            }
         }
 
         mazeGenerator.CreateMaze();
+        return cells;
     }
 }
