@@ -13,9 +13,10 @@ public class MazeGenerator : MonoBehaviour
 
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
+    [SerializeField] private CellFinder cellFinder;
 
     private Transform mazeHolder;
-    private GameObject wallHolder;
+    private GameObject wallsParent;
     private Vector3 startPos, currentPos;
     private Camera mainCam;
 
@@ -50,9 +51,9 @@ public class MazeGenerator : MonoBehaviour
                 //The current posistion of where the wall is placed is found by starting at the beginning and simply placing
                 //walls of the exact size of 1 until the loop reaches the set max size for the height.
                 currentPos = new Vector3(startPos.x + (h * WALLLENGTH) - WALLLENGTH / 2f, 0f, startPos.z + (w * WALLLENGTH) - WALLLENGTH / 2f);
-                wallHolder = Instantiate(wallPrefab, currentPos, Quaternion.identity);
-                wallHolder.name = "Vertical wall: " + w + ", " + h;
-                wallHolder.transform.SetParent(mazeHolder);
+                wallsParent = Instantiate(wallPrefab, currentPos, Quaternion.identity);
+                wallsParent.name = "Vertical wall: " + w + ", " + h;
+                wallsParent.transform.SetParent(mazeHolder);
             }
         }
 
@@ -63,10 +64,17 @@ public class MazeGenerator : MonoBehaviour
             {
                 currentPos = new Vector3(startPos.x + (h * WALLLENGTH), 0f, startPos.z + (w * WALLLENGTH) - WALLLENGTH);
                 //Main difference here is the wall needed to be rotated
-                wallHolder = Instantiate(wallPrefab, currentPos, Quaternion.Euler(0, 90, 0));
-                wallHolder.name = "Horizontal wall: " + w + ", " + h;
-                wallHolder.transform.SetParent(mazeHolder);
+                wallsParent = Instantiate(wallPrefab, currentPos, Quaternion.Euler(0, 90, 0));
+                wallsParent.name = "Horizontal wall: " + w + ", " + h;
+                wallsParent.transform.SetParent(mazeHolder);
             }
         }
+
+        cellFinder.FindCells(wallsParent, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
+    }
+    
+    public void CreateMaze()
+    {
+
     }
 }
