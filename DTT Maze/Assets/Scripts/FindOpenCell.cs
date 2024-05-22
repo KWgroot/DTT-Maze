@@ -5,8 +5,8 @@ using System.Linq;
 
 public class FindOpenCell : MonoBehaviour
 {
-    private List<Cell> unvisitedCells = new List<Cell>();
     private Cell[,] cellGrid;
+    private List<Cell> unvisitedCells = new List<Cell>();
 
     private int mazeHeight, mazeWidth;
     private Cell cellWest, cellEast, cellSouth, cellNorth;
@@ -19,22 +19,24 @@ public class FindOpenCell : MonoBehaviour
         if (this.cellGrid == null)
             this.cellGrid = cellGrid;
 
-        //unvisitedCells = GetUnvisitedCells(currentCell);
+        GetUnvisitedCells(currentCell);
 
         return unvisitedCells.OrderBy(x => Random.Range(1, 10)).FirstOrDefault();
     }
 
-    private IEnumerable<Cell> GetUnvisitedCells(Cell currentCell)
+    private void GetUnvisitedCells(Cell currentCell)
     {
-        int x = (int)currentCell.position.x;
-        int z = (int)currentCell.position.z;
+        unvisitedCells.Clear();
 
-        if (x - 1 >= mazeWidth) // West
+        int x = (int)currentCell.position.x + mazeWidth / 2;
+        int z = (int)currentCell.position.z + mazeHeight / 2;
+
+        if (x - 1 >= 0) // West
         {
             cellWest = cellGrid[x - 1, z];
 
             if (cellWest.visited == false)
-                yield return cellWest;
+                unvisitedCells.Add(cellWest);
         }
 
         if (x + 1 < mazeWidth) // East
@@ -42,15 +44,15 @@ public class FindOpenCell : MonoBehaviour
             cellEast = cellGrid[x + 1, z];
 
             if (cellEast.visited == false)
-                yield return cellEast;
+                unvisitedCells.Add((cellEast));
         }
 
-        if (z - 1 >= mazeHeight)
+        if (z - 1 >= 0)
         {
             cellSouth = cellGrid[x, z - 1];
 
             if (cellSouth.visited == false)
-                yield return cellSouth;
+                unvisitedCells.Add(cellSouth);
         }
 
         if (z + 1 < mazeHeight)
@@ -58,7 +60,7 @@ public class FindOpenCell : MonoBehaviour
             cellNorth = cellGrid[x, z + 1];
 
             if (cellNorth.visited == false)
-                yield return cellNorth;
+                unvisitedCells.Add(cellNorth);
         }
     }
 }

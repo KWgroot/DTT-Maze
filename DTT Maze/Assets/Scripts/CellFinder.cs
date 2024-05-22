@@ -49,8 +49,8 @@ public class CellFinder : MonoBehaviour
 
             cells[cellProgress].SetPosition();
 
-            x = (int)cells[cellProgress].position.x;
-            z = (int)cells[cellProgress].position.z;
+            x = Mathf.CeilToInt(cells[cellProgress].position.x);
+            z = Mathf.CeilToInt(cells[cellProgress].position.z);
 
             cellGrid[x + mazeWidth / 2, z + mazeHeight / 2] = cells[cellProgress];
 
