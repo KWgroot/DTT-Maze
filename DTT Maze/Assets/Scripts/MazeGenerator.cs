@@ -14,6 +14,7 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
     [SerializeField] private CellFinder cellFinder;
+    [SerializeField] private FindOpenCell openCellFinder;
 
     private Transform mazeHolder;
     private GameObject wallsParent;
@@ -72,20 +73,46 @@ public class MazeGenerator : MonoBehaviour
         cells = cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }
     
-    public void CreateMaze()
+    public IEnumerator ApplyAlgorithm(Cell previousCell, Cell currentCell, Cell[,] cellGrid)
     {
-        /*do
+        currentCell.Visit();
+        ClearWalls(previousCell, currentCell);
+
+        yield return new WaitForSeconds(0.1f);
+
+        Cell nextCell = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeHeight, mazeWidth);
+
+        if (nextCell != null)
+            yield return ApplyAlgorithm(currentCell, nextCell, cellGrid);
+    }
+
+    private void ClearWalls(Cell previousCell, Cell currentCell)
+    {
+        if (previousCell == null)
+            return;
+
+        if (previousCell.position.x < currentCell.position.x) //West
         {
-            if (cellsVisited == 0)
-            {
-                
-            }
-            else
-            {
-
-            }
-
+            currentCell.ClearWall(3);
+            return;
         }
-        while (cellsVisited < mazeHeight * mazeWidth);*/
+
+        if (previousCell.position.x > currentCell.position.x) //East
+        {
+            currentCell.ClearWall(2);
+            return;
+        }
+
+        if (previousCell.position.z < currentCell.position.z) //South
+        {
+            currentCell.ClearWall(4);
+            return;
+        }
+
+        if (previousCell.position.z > currentCell.position.z) //North
+        {
+            currentCell.ClearWall(1);
+            return;
+        }
     }
 }

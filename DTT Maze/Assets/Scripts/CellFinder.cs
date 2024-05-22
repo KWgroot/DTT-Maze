@@ -10,14 +10,16 @@ public class CellFinder : MonoBehaviour
 
     [SerializeField] private MazeGenerator mazeGenerator;
     [SerializeField] private Cell[] cells;
+    private Cell[,] cellGrid;
 
     private GameObject[] walls;
-    private int rowCount = 0, childCount = 0;
+    private int rowCount = 0, childCount = 0, x, z;
 
     //We will receive the gameobject that houses all walls for the maze and the amount of cells we expect to find.
     public Cell[] FindCells(Transform wallsParent, int cellAmount, int mazeHeight, int mazeWidth)
     {
         cells = new Cell[cellAmount];
+        cellGrid = new Cell[mazeWidth, mazeHeight];
         walls = new GameObject[wallsParent.transform.childCount];
 
         //First the easy part, assign all the walls we have to our array
@@ -33,7 +35,7 @@ public class CellFinder : MonoBehaviour
         int cellProgress = 0;       //check the cell number we're looking for
 
         for (int i = 0; i < mazeHeight; i++)
-        {            
+        {
             cells[cellProgress] = new Cell();
 
             cells[cellProgress].westWall = walls[eastWestWalls];
@@ -44,6 +46,13 @@ public class CellFinder : MonoBehaviour
 
             cells[cellProgress].northWall = walls[northSouthWalls + (mazeHeight + 1) * mazeWidth + mazeHeight - 1];
             cells[cellProgress].eastWall = walls[eastWestWalls];
+
+            cells[cellProgress].SetPosition();
+
+            x = (int)cells[cellProgress].position.x;
+            z = (int)cells[cellProgress].position.z;
+
+            cellGrid[x + mazeWidth / 2, z + mazeHeight / 2] = cells[cellProgress];
 
             rowCount++;
             cellProgress++;         //Next cell or row depending if we've reached the end of this row
@@ -57,7 +66,7 @@ public class CellFinder : MonoBehaviour
             }
         }
 
-        mazeGenerator.CreateMaze();
+        StartCoroutine(mazeGenerator.ApplyAlgorithm(null, cells[0], cellGrid));
         return cells;
     }
 }
