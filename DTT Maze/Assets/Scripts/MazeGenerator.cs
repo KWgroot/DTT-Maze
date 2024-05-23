@@ -2,26 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The main generator class that will hold the chosen algorithm but 
+/// outsources the finding of cells to other classes.
+/// </summary>
 public class MazeGenerator : MonoBehaviour
 {
-    ///<summary>
-    ///A new approach where walls are placed first so there won't be overlapping walls,
-    ///as performance is a huge problem when making 250x250 mazes.
-    ///Then by looking at wall positions order the space between them into a collection of cells.
-    ///Using those cells run the randomized depth first search algorithm as we can now use recursion.
-    ///</summary>
-
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
-    [SerializeField] [Range(0.001f, 0.2f)] private float generationSpeed = 0.001f;
+    [SerializeField] [Range(0f, 3f)] private float generationSpeed = 0f;
     [SerializeField] private CellFinder cellFinder;
     [SerializeField] private FindOpenCell openCellFinder;
+
+    private Stack cellStack = new Stack();
+    private List<Cell> unvisitedCells = new List<Cell>();
 
     private Transform mazeHolder;
     private GameObject wallsParent;
     private Vector3 startPos, currentPos;
     private Camera mainCam;
-    private Cell[] cells;
 
     const float WALLLENGTH = 1f;
 
@@ -32,11 +31,14 @@ public class MazeGenerator : MonoBehaviour
 
         //Fix the camera position
         mainCam = Camera.main;
-        mainCam.orthographicSize = mazeHeight / 1.9f;
+        mainCam.orthographicSize = Mathf.Max((mazeHeight / 1.9f), (mazeWidth / 3.8f));
 
         CreateWalls();
     }
 
+    /// <summary>
+    /// Simply 'creates' walls by placing the wall prefab along the set sizes of the maze.
+    /// </summary>
     public void CreateWalls()
     {
         //First we will need a starting position from where we start placing the walls
@@ -70,44 +72,69 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        cells = cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
+        cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }
     
-    public IEnumerator ApplyAlgorithm(Cell previousCell, Cell currentCell, Cell[,] cellGrid)
+    /// <summary>
+    /// Here the maze algorithm is actually used that carves out a path through the walls
+    /// by following it's steps.
+    /// </summary>
+    /// <param name="currentCell">The current cell from which the maze is made.</param>
+    /// <param name="cellGrid">Grid holding all cells in a neatly organized 2d array.</param>
+    /// <returns></returns>
+    public IEnumerator ApplyAlgorithm(Cell currentCell, Cell[,] cellGrid)
     {
-        currentCell.Visit();
-        ClearWalls(previousCell, currentCell);
-
-        yield return new WaitForSeconds(generationSpeed);
-
-        Cell nextCell;
-
+        currentCell.Visit(); // First cell must be visited
+        Cell nextCell = new Cell();
         do
         {
-            nextCell = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
+            // Grab all the unvisited nearby cells
+            unvisitedCells = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
 
-            if (nextCell != null)
-                yield return ApplyAlgorithm(currentCell, nextCell, cellGrid);
-        } while (nextCell != null);
+            if (unvisitedCells.Count > 0) // If we can still find unvisited cells nearby, go for one of those
+            {
+                nextCell = unvisitedCells[Random.Range(0, unvisitedCells.Count)];
+            }
+            else // If we cant, start going through the stack of previous cells we visited.
+            {
+                nextCell = null;
+            }            
+
+            if (nextCell != null) // We have found a next unvisited cell and will now visit it
+            {                
+                nextCell.Visit();
+                cellStack.Push(currentCell);
+                ClearWalls(currentCell, nextCell);
+                currentCell = nextCell;
+                yield return new WaitForSeconds(generationSpeed);
+            }
+            else
+            {
+                currentCell = (Cell)cellStack.Pop();
+            }
+        } while (cellStack.Count > 0);
     }
 
-    private void ClearWalls(Cell previousCell, Cell currentCell)
+    /// <summary>
+    /// Simply clears the wall between two cells by checking their grid position.
+    /// </summary>
+    /// <param name="currentCell">Cell we are moving away from.</param>
+    /// <param name="nextCell">Cell we are going to.</param>
+    private void ClearWalls(Cell currentCell, Cell nextCell)
     {
-        if (previousCell == null)
+        if (currentCell == null)
             return;
 
-        Debug.Log(previousCell.gridPos + "  " + currentCell.gridPos);
+        if (currentCell.gridPos.x < nextCell.gridPos.x)
+            currentCell.ClearWall(2);
 
-        if (previousCell.gridPos.x < currentCell.gridPos.x)
-            previousCell.ClearWall(2);
+        if (currentCell.gridPos.x > nextCell.gridPos.x)
+            currentCell.ClearWall(3);
 
-        if (previousCell.gridPos.x > currentCell.gridPos.x)
-            previousCell.ClearWall(3);
+        if (currentCell.gridPos.y < nextCell.gridPos.y)
+            currentCell.ClearWall(1);
 
-        if (previousCell.gridPos.y < currentCell.gridPos.y)
-            previousCell.ClearWall(1);
-
-        if (previousCell.gridPos.y > currentCell.gridPos.y)
-            previousCell.ClearWall(4);
+        if (currentCell.gridPos.y > nextCell.gridPos.y)
+            currentCell.ClearWall(4);
     }
 }

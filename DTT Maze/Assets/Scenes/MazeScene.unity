@@ -619,9 +619,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallPrefab: {fileID: 1545852185676393056, guid: b2159d4b5cd64794086fcebe3844f3d2,
     type: 3}
-  mazeHeight: 245
-  mazeWidth: 12
-  generationSpeed: 0.001
+  mazeHeight: 32
+  mazeWidth: 23
+  generationSpeed: 0
   cellFinder: {fileID: 1734608212}
   openCellFinder: {fileID: 1734608213}
 --- !u!114 &1734608212

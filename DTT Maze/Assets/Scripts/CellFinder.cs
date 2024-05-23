@@ -16,7 +16,7 @@ public class CellFinder : MonoBehaviour
     private GameObject[] walls;
 
     //We will receive the gameobject that houses all walls for the maze and the amount of cells we expect to find.
-    public Cell[] FindCells(Transform wallsParent, int cellAmount, int mazeHeight, int mazeWidth)
+    public void FindCells(Transform wallsParent, int cellAmount, int mazeHeight, int mazeWidth)
     {
         cells = new Cell[cellAmount];
         walls = new GameObject[wallsParent.transform.childCount];
@@ -39,22 +39,20 @@ public class CellFinder : MonoBehaviour
         {
             cells[cellProgress] = new Cell();
 
+            // First wall is always the westwall so assign that wall first
             cells[cellProgress].westWall = walls[eastWestWalls];
-            cells[cellProgress].southWall = walls[northSouthWalls + (mazeHeight + 1) * mazeWidth];
+
+            // Next is the south wall which is the first horizontal wall found by going to the lowest and most left corner
+            cells[cellProgress].southWall = walls[northSouthWalls + (mazeHeight) * mazeWidth + mazeHeight];
 
             northSouthWalls++;
             eastWestWalls++;
 
+            // Now for the other two walls do the same thing but opposite due to incrementing our values
             cells[cellProgress].northWall = walls[northSouthWalls + (mazeHeight + 1) * mazeWidth + mazeHeight - 1];
             cells[cellProgress].eastWall = walls[eastWestWalls];
 
-            cells[cellProgress].SetPosition();
-
-            //north
-            //south
-            //west
-            //east
-
+            // Lastly all the cells we found should be found again easily, so assign them to a 2d array grid
             cells[cellProgress].SetGridPosition(rowCount, columnCount);
             cellGrid[rowCount, columnCount] = cells[cellProgress];
 
@@ -71,8 +69,6 @@ public class CellFinder : MonoBehaviour
             }
         }
 
-
-        StartCoroutine(mazeGenerator.ApplyAlgorithm(null, cells[0], cellGrid));
-        return cells;
+        StartCoroutine(mazeGenerator.ApplyAlgorithm(cells[0], cellGrid));
     }
 }
