@@ -69,6 +69,7 @@ public class CellFinder : MonoBehaviour
             }
         }
 
-        StartCoroutine(mazeGenerator.ApplyAlgorithm(cells[0], cellGrid));
+        //StartCoroutine(mazeGenerator.ApplyAlgorithm(cells[0], cellGrid));
+        mazeGenerator.ApplyAlgorithm(cells[0], cellGrid);
     }
 }

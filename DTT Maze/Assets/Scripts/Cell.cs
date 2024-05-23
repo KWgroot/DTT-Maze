@@ -38,26 +38,29 @@ public class Cell
     /// <param name="wall">Int to check in the switch case</param>
     public void ClearWall(int wall)
     {
-        switch (wall)
+        if (northWall != null || eastWall != null || westWall != null || southWall != null)
         {
-            case 1:
-                northWall.SetActive(false);
-                break;
+            switch (wall)
+            {
+                case 1:
+                    northWall.SetActive(false);
+                    break;
 
-            case 2:
-                eastWall.SetActive(false);
-                break;
+                case 2:
+                    eastWall.SetActive(false);
+                    break;
 
-            case 3:
-                westWall.SetActive(false);
-                break;
+                case 3:
+                    westWall.SetActive(false);
+                    break;
 
-            case 4:
-                southWall.SetActive(false);
-                break;
+                case 4:
+                    southWall.SetActive(false);
+                    break;
 
-            default:
-                break;
-        }
+                default:
+                    break;
+            }
+        }       
     }
 }

@@ -41,6 +41,9 @@ public class FindOpenCell : MonoBehaviour
         int x = (int)currentCell.gridPos.x; //Due to setting up a much simpler grid we can now just check
         int z = (int)currentCell.gridPos.y; //the positions of each cell in grid and find our neighbours.
 
+        if (cellGrid.Length <= 0)
+            return;
+
         if (x + 1 < mazeWidth)                  // Cell to the right
         {
             cellEast = cellGrid[x + 1, z];      // Grab the cell

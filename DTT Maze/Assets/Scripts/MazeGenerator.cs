@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// The main generator class that will hold the chosen algorithm but 
@@ -13,11 +16,15 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] [Range(0f, 3f)] private float generationSpeed = 0f;
     [SerializeField] private CellFinder cellFinder;
     [SerializeField] private FindOpenCell openCellFinder;
+    [SerializeField] private Slider heightSlider, widthSlider;
+    [SerializeField] private Button generateButton, reloadButton;
+    [SerializeField] private TextMeshProUGUI heightText, widthText;
 
     private Stack cellStack = new Stack();
     private List<Cell> unvisitedCells = new List<Cell>();
 
     private Transform mazeHolder;
+    private List<GameObject> wallsToBatch = new List<GameObject>();
     private GameObject wallsParent;
     private Vector3 startPos, currentPos;
     private Camera mainCam;
@@ -29,11 +36,24 @@ public class MazeGenerator : MonoBehaviour
         //Grab the gameobject on which all the maze parts will be placed
         mazeHolder = transform.GetChild(0);
 
-        //Fix the camera position
-        mainCam = Camera.main;
-        mainCam.orthographicSize = Mathf.Max((mazeHeight / 1.9f), (mazeWidth / 3.8f));
+        reloadButton.interactable = false;
+    }
 
-        CreateWalls();
+    public void SetMazeHeight()
+    {
+        mazeHeight = (int)heightSlider.value;
+        heightText.text = mazeHeight.ToString();
+    }
+
+    public void SetMazeWidth()
+    {
+        mazeWidth = (int)widthSlider.value;
+        widthText.text = mazeWidth.ToString();
+    }
+
+    public void Reset()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     /// <summary>
@@ -41,6 +61,15 @@ public class MazeGenerator : MonoBehaviour
     /// </summary>
     public void CreateWalls()
     {
+        heightSlider.interactable = false;
+        widthSlider.interactable = false;
+        generateButton.interactable = false;
+        reloadButton.interactable = true;
+
+        //Fix the camera position
+        mainCam = Camera.main;
+        mainCam.orthographicSize = Mathf.Max((mazeHeight / 1.9f), (mazeWidth / 3.8f));
+
         //First we will need a starting position from where we start placing the walls
         startPos = new Vector3((-mazeWidth / 2f) + WALLLENGTH / 2f, 0f, (-mazeHeight / 2f) + WALLLENGTH / 2f);
         currentPos = startPos;
@@ -54,6 +83,7 @@ public class MazeGenerator : MonoBehaviour
                 //walls of the exact size of 1 until the loop reaches the set max size for the height.
                 currentPos = new Vector3(startPos.x + (h * WALLLENGTH) - WALLLENGTH / 2f, 0f, startPos.z + (w * WALLLENGTH) - WALLLENGTH / 2f);
                 wallsParent = Instantiate(wallPrefab, currentPos, Quaternion.identity);
+                wallsToBatch.Add(wallsParent);
                 wallsParent.name = "Vertical wall: " + w + ", " + h;
                 wallsParent.transform.SetParent(mazeHolder);
             }
@@ -67,10 +97,13 @@ public class MazeGenerator : MonoBehaviour
                 currentPos = new Vector3(startPos.x + (h * WALLLENGTH), 0f, startPos.z + (w * WALLLENGTH) - WALLLENGTH);
                 //Main difference here is the wall needed to be rotated
                 wallsParent = Instantiate(wallPrefab, currentPos, Quaternion.Euler(0, 90, 0));
+                wallsToBatch.Add(wallsParent);
                 wallsParent.name = "Horizontal wall: " + w + ", " + h;
                 wallsParent.transform.SetParent(mazeHolder);
             }
         }
+
+        StaticBatchingUtility.Combine(wallsToBatch.ToArray(), mazeHolder.gameObject);
 
         cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }
@@ -82,7 +115,7 @@ public class MazeGenerator : MonoBehaviour
     /// <param name="currentCell">The current cell from which the maze is made.</param>
     /// <param name="cellGrid">Grid holding all cells in a neatly organized 2d array.</param>
     /// <returns></returns>
-    public IEnumerator ApplyAlgorithm(Cell currentCell, Cell[,] cellGrid)
+    public void ApplyAlgorithm(Cell currentCell, Cell[,] cellGrid)
     {
         currentCell.Visit(); // First cell must be visited
         Cell nextCell = new Cell();
@@ -106,12 +139,13 @@ public class MazeGenerator : MonoBehaviour
                 cellStack.Push(currentCell);
                 ClearWalls(currentCell, nextCell);
                 currentCell = nextCell;
-                yield return new WaitForSeconds(generationSpeed);
+                //yield return new WaitForSeconds(generationSpeed);
             }
-            else
+            else if (cellStack.Count > 0)
             {
                 currentCell = (Cell)cellStack.Pop();
             }
+
         } while (cellStack.Count > 0);
     }
 
