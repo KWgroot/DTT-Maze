@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using DG.Tweening;
 
 /// <summary>
 /// The main generator class that will hold the chosen algorithm but 
@@ -19,6 +20,9 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private Slider heightSlider, widthSlider, speedSlider;
     [SerializeField] private Button generateButton, reloadButton;
     [SerializeField] private TextMeshProUGUI heightText, widthText, speedText;
+    
+    [SerializeField] private Gradient gradient = new Gradient();
+    [SerializeField] private Material wallMat;
 
     private Stack cellStack = new Stack();
     private List<Cell> unvisitedCells = new List<Cell>();
@@ -111,6 +115,8 @@ public class MazeGenerator : MonoBehaviour
         }
 
         StaticBatchingUtility.Combine(wallsToBatch.ToArray(), mazeHolder.gameObject);
+
+        wallMat.DOGradientColor(gradient, 20f).SetLoops(-1, LoopType.Restart);
 
         cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.11478224, g: 0.07381431, b: 0.15141118, a: 1}
+  m_IndirectSpecularColor: {r: 0.11489872, g: 0.073905006, b: 0.15152328, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2399,6 +2399,37 @@ MonoBehaviour:
   heightText: {fileID: 1947844947}
   widthText: {fileID: 357715565}
   speedText: {fileID: 1951685681}
+  gradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 0, b: 0, a: 1}
+    key1: {r: 1, g: 0.06666666, b: 0.5588764, a: 1}
+    key2: {r: 0.8125138, g: 0.11764705, b: 1, a: 0}
+    key3: {r: 0.19999999, g: 0.4087139, b: 1, a: 0}
+    key4: {r: 0.30980396, g: 0.87187016, b: 1, a: 0}
+    key5: {r: 0.35686278, g: 1, b: 0.8115019, a: 0}
+    key6: {r: 0.59763545, g: 1, b: 0.4431373, a: 0}
+    key7: {r: 1, g: 0.8746814, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 7710
+    ctime2: 16191
+    ctime3: 24287
+    ctime4: 35466
+    ctime5: 45682
+    ctime6: 55705
+    ctime7: 65535
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 8
+    m_NumAlphaKeys: 2
+  wallMat: {fileID: 2100000, guid: 7eb8f95f72be1e14a9ea247cdfaf2a6d, type: 2}
 --- !u!114 &1734608212
 MonoBehaviour:
   m_ObjectHideFlags: 0
