@@ -13,6 +13,7 @@ public class MazeGenerator : MonoBehaviour
 
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
+    [SerializeField] [Range(0.001f, 0.2f)] private float generationSpeed = 0.001f;
     [SerializeField] private CellFinder cellFinder;
     [SerializeField] private FindOpenCell openCellFinder;
 
@@ -21,7 +22,6 @@ public class MazeGenerator : MonoBehaviour
     private Vector3 startPos, currentPos;
     private Camera mainCam;
     private Cell[] cells;
-    private int cellsVisited = 0;
 
     const float WALLLENGTH = 1f;
 
@@ -78,12 +78,17 @@ public class MazeGenerator : MonoBehaviour
         currentCell.Visit();
         ClearWalls(previousCell, currentCell);
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(generationSpeed);
 
-        Cell nextCell = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeHeight, mazeWidth);
+        Cell nextCell;
 
-        if (nextCell != null)
-            yield return ApplyAlgorithm(currentCell, nextCell, cellGrid);
+        do
+        {
+            nextCell = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
+
+            if (nextCell != null)
+                yield return ApplyAlgorithm(currentCell, nextCell, cellGrid);
+        } while (nextCell != null);
     }
 
     private void ClearWalls(Cell previousCell, Cell currentCell)
@@ -91,28 +96,18 @@ public class MazeGenerator : MonoBehaviour
         if (previousCell == null)
             return;
 
-        if (previousCell.position.x < currentCell.position.x) //West
-        {
-            currentCell.ClearWall(3);
-            return;
-        }
+        Debug.Log(previousCell.gridPos + "  " + currentCell.gridPos);
 
-        if (previousCell.position.x > currentCell.position.x) //East
-        {
-            currentCell.ClearWall(2);
-            return;
-        }
+        if (previousCell.gridPos.x < currentCell.gridPos.x)
+            previousCell.ClearWall(2);
 
-        if (previousCell.position.z < currentCell.position.z) //South
-        {
-            currentCell.ClearWall(4);
-            return;
-        }
+        if (previousCell.gridPos.x > currentCell.gridPos.x)
+            previousCell.ClearWall(3);
 
-        if (previousCell.position.z > currentCell.position.z) //North
-        {
-            currentCell.ClearWall(1);
-            return;
-        }
+        if (previousCell.gridPos.y < currentCell.gridPos.y)
+            previousCell.ClearWall(1);
+
+        if (previousCell.gridPos.y > currentCell.gridPos.y)
+            previousCell.ClearWall(4);
     }
 }

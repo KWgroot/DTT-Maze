@@ -9,6 +9,7 @@ public class Cell
 
     [SerializeField] public bool visited;
     [SerializeField] public Vector3 position;
+    [SerializeField] public Vector2 gridPos;
 
     public void Visit()
     {
@@ -19,7 +20,11 @@ public class Cell
     {
         position = (northWall.transform.position + eastWall.transform.position +
             westWall.transform.position + southWall.transform.position) / 4;
+    }
 
+    public void SetGridPosition(int x, int z)
+    {
+        gridPos = new Vector2(x, z);
     }
 
     public void ClearWall(int wall)
@@ -27,18 +32,22 @@ public class Cell
         switch (wall)
         {
             case 1:
+                Debug.Log("North");
                 northWall.SetActive(false);
                 break;
 
             case 2:
+                Debug.Log("East");
                 eastWall.SetActive(false);
                 break;
 
-            case 3: 
+            case 3:
+                Debug.Log("West");
                 westWall.SetActive(false);
                 break;
 
             case 4:
+                Debug.Log("South");
                 southWall.SetActive(false);
                 break;
 
