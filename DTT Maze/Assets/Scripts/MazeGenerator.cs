@@ -13,12 +13,12 @@ public class MazeGenerator : MonoBehaviour
 {
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
-    [SerializeField] [Range(0f, 3f)] private float generationSpeed = 0f;
+    [Range(0f, 0.5f)] public float generationSpeed = 0f;
     [SerializeField] private CellFinder cellFinder;
     [SerializeField] private FindOpenCell openCellFinder;
-    [SerializeField] private Slider heightSlider, widthSlider;
+    [SerializeField] private Slider heightSlider, widthSlider, speedSlider;
     [SerializeField] private Button generateButton, reloadButton;
-    [SerializeField] private TextMeshProUGUI heightText, widthText;
+    [SerializeField] private TextMeshProUGUI heightText, widthText, speedText;
 
     private Stack cellStack = new Stack();
     private List<Cell> unvisitedCells = new List<Cell>();
@@ -51,6 +51,12 @@ public class MazeGenerator : MonoBehaviour
         widthText.text = mazeWidth.ToString();
     }
 
+    public void SetSpeed()
+    {
+        generationSpeed = speedSlider.value;
+        speedText.text = (0.5 - generationSpeed).ToString("0.00");
+    }
+
     public void Reset()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -64,11 +70,12 @@ public class MazeGenerator : MonoBehaviour
         heightSlider.interactable = false;
         widthSlider.interactable = false;
         generateButton.interactable = false;
+        speedSlider.interactable = false;
         reloadButton.interactable = true;
 
         //Fix the camera position
         mainCam = Camera.main;
-        mainCam.orthographicSize = Mathf.Max((mazeHeight / 1.9f), (mazeWidth / 3.8f));
+        mainCam.orthographicSize = Mathf.Max((mazeHeight / 1.9f), (mazeWidth / 3.5f));
 
         //First we will need a starting position from where we start placing the walls
         startPos = new Vector3((-mazeWidth / 2f) + WALLLENGTH / 2f, 0f, (-mazeHeight / 2f) + WALLLENGTH / 2f);
@@ -139,7 +146,40 @@ public class MazeGenerator : MonoBehaviour
                 cellStack.Push(currentCell);
                 ClearWalls(currentCell, nextCell);
                 currentCell = nextCell;
-                //yield return new WaitForSeconds(generationSpeed);
+            }
+            else if (cellStack.Count > 0)
+            {
+                currentCell = (Cell)cellStack.Pop();
+            }
+
+        } while (cellStack.Count > 0);
+    }
+
+    public IEnumerator ApplyAlgorithmWait(Cell currentCell, Cell[,] cellGrid)
+    {
+        currentCell.Visit(); // First cell must be visited
+        Cell nextCell = new Cell();
+        do
+        {
+            // Grab all the unvisited nearby cells
+            unvisitedCells = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
+
+            if (unvisitedCells.Count > 0) // If we can still find unvisited cells nearby, go for one of those
+            {
+                nextCell = unvisitedCells[Random.Range(0, unvisitedCells.Count)];
+            }
+            else // If we cant, start going through the stack of previous cells we visited.
+            {
+                nextCell = null;
+            }
+
+            if (nextCell != null) // We have found a next unvisited cell and will now visit it
+            {
+                nextCell.Visit();
+                cellStack.Push(currentCell);
+                ClearWalls(currentCell, nextCell);
+                currentCell = nextCell;
+                yield return new WaitForSeconds(generationSpeed);
             }
             else if (cellStack.Count > 0)
             {
