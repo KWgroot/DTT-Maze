@@ -12,26 +12,27 @@ using DG.Tweening;
 /// </summary>
 public class MazeGenerator : MonoBehaviour
 {
+    [SerializeField] Algorithms algorithms;
+
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] [Range(10f, 250f)] private int mazeHeight, mazeWidth;
-    [Range(0f, 0.5f)] public float generationSpeed = 0f;
+    [Range(0f, 0.25f)] public float generationSpeed = 0f;
     [SerializeField] private CellFinder cellFinder;
     [SerializeField] private FindOpenCell openCellFinder;
-    [SerializeField] private Slider heightSlider, widthSlider, speedSlider;
+    [SerializeField] private Slider heightSlider, widthSlider, speedSlider, algorithmSlider;
     [SerializeField] private Button generateButton, reloadButton;
-    [SerializeField] private TextMeshProUGUI heightText, widthText, speedText;
+    [SerializeField] private TextMeshProUGUI heightText, widthText, speedText, algorithmText;
     
     [SerializeField] private Gradient gradient = new Gradient();
     [SerializeField] private Material wallMat;
-
-    private Stack cellStack = new Stack();
-    private List<Cell> unvisitedCells = new List<Cell>();
 
     private Transform mazeHolder;
     private List<GameObject> wallsToBatch = new List<GameObject>();
     private GameObject wallsParent;
     private Vector3 startPos, currentPos;
     private Camera mainCam;
+
+    private int chosenAlgorithm = 1;
 
     const float WALLLENGTH = 1f;
 
@@ -41,6 +42,21 @@ public class MazeGenerator : MonoBehaviour
         mazeHolder = transform.GetChild(0);
 
         reloadButton.interactable = false;
+    }
+
+    public void SetAlgorithm()
+    {
+        chosenAlgorithm = (int)algorithmSlider.value;
+        switch (chosenAlgorithm)
+        {
+            case 1:
+                algorithmText.text = "Depth-First";
+                break;
+
+            case 2:
+                algorithmText.text = "Wilsons";
+                    break;
+        }
     }
 
     public void SetMazeHeight()
@@ -58,7 +74,7 @@ public class MazeGenerator : MonoBehaviour
     public void SetSpeed()
     {
         generationSpeed = speedSlider.value;
-        speedText.text = (0.5 - generationSpeed).ToString("0.00");
+        speedText.text = (0.25f - generationSpeed).ToString("0.00");
     }
 
     public void Reset()
@@ -75,6 +91,7 @@ public class MazeGenerator : MonoBehaviour
         widthSlider.interactable = false;
         generateButton.interactable = false;
         speedSlider.interactable = false;
+        algorithmSlider.interactable = false;
         reloadButton.interactable = true;
 
         //Fix the camera position
@@ -121,100 +138,24 @@ public class MazeGenerator : MonoBehaviour
         cellFinder.FindCells(mazeHolder, mazeHeight * mazeWidth, mazeHeight, mazeWidth);
     }
     
-    /// <summary>
-    /// Here the maze algorithm is actually used that carves out a path through the walls
-    /// by following it's steps.
-    /// </summary>
-    /// <param name="currentCell">The current cell from which the maze is made.</param>
-    /// <param name="cellGrid">Grid holding all cells in a neatly organized 2d array.</param>
-    /// <returns></returns>
+    
     public void ApplyAlgorithm(Cell currentCell, Cell[,] cellGrid)
     {
-        currentCell.Visit(); // First cell must be visited
-        Cell nextCell = new Cell();
-        do
+        switch (chosenAlgorithm)
         {
-            // Grab all the unvisited nearby cells
-            unvisitedCells = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
+            case 1:
+                if (generationSpeed > 0)
+                    StartCoroutine(algorithms.RandomDepthFirstCoroutine(currentCell, cellGrid, mazeWidth, mazeHeight, openCellFinder, generationSpeed));
+                else
+                    algorithms.RandomDepthFirst(currentCell, cellGrid, mazeWidth, mazeHeight, openCellFinder);
+                break;
 
-            if (unvisitedCells.Count > 0) // If we can still find unvisited cells nearby, go for one of those
-            {
-                nextCell = unvisitedCells[Random.Range(0, unvisitedCells.Count)];
-            }
-            else // If we cant, start going through the stack of previous cells we visited.
-            {
-                nextCell = null;
-            }            
-
-            if (nextCell != null) // We have found a next unvisited cell and will now visit it
-            {                
-                nextCell.Visit();
-                cellStack.Push(currentCell);
-                ClearWalls(currentCell, nextCell);
-                currentCell = nextCell;
-            }
-            else if (cellStack.Count > 0)
-            {
-                currentCell = (Cell)cellStack.Pop();
-            }
-
-        } while (cellStack.Count > 0);
-    }
-
-    public IEnumerator ApplyAlgorithmWait(Cell currentCell, Cell[,] cellGrid)
-    {
-        currentCell.Visit(); // First cell must be visited
-        Cell nextCell = new Cell();
-        do
-        {
-            // Grab all the unvisited nearby cells
-            unvisitedCells = openCellFinder.GetUnvisitedCell(currentCell, cellGrid, mazeWidth, mazeHeight);
-
-            if (unvisitedCells.Count > 0) // If we can still find unvisited cells nearby, go for one of those
-            {
-                nextCell = unvisitedCells[Random.Range(0, unvisitedCells.Count)];
-            }
-            else // If we cant, start going through the stack of previous cells we visited.
-            {
-                nextCell = null;
-            }
-
-            if (nextCell != null) // We have found a next unvisited cell and will now visit it
-            {
-                nextCell.Visit();
-                cellStack.Push(currentCell);
-                ClearWalls(currentCell, nextCell);
-                currentCell = nextCell;
-                yield return new WaitForSeconds(generationSpeed);
-            }
-            else if (cellStack.Count > 0)
-            {
-                currentCell = (Cell)cellStack.Pop();
-            }
-
-        } while (cellStack.Count > 0);
-    }
-
-    /// <summary>
-    /// Simply clears the wall between two cells by checking their grid position.
-    /// </summary>
-    /// <param name="currentCell">Cell we are moving away from.</param>
-    /// <param name="nextCell">Cell we are going to.</param>
-    private void ClearWalls(Cell currentCell, Cell nextCell)
-    {
-        if (currentCell == null)
-            return;
-
-        if (currentCell.gridPos.x < nextCell.gridPos.x)
-            currentCell.ClearWall(2);
-
-        if (currentCell.gridPos.x > nextCell.gridPos.x)
-            currentCell.ClearWall(3);
-
-        if (currentCell.gridPos.y < nextCell.gridPos.y)
-            currentCell.ClearWall(1);
-
-        if (currentCell.gridPos.y > nextCell.gridPos.y)
-            currentCell.ClearWall(4);
+            case 2:
+                if (generationSpeed > 0)
+                    StartCoroutine(algorithms.WilsonWalkCoroutine(cellGrid, mazeWidth, mazeHeight, openCellFinder, generationSpeed));
+                else
+                    algorithms.WilsonWalk(cellGrid, mazeWidth, mazeHeight, openCellFinder);
+                break;
+        }
     }
 }

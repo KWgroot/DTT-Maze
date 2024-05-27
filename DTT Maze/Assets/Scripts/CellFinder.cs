@@ -55,6 +55,7 @@ public class CellFinder : MonoBehaviour
             // Lastly all the cells we found should be found again easily, so assign them to a 2d array grid
             cells[cellProgress].SetGridPosition(rowCount, columnCount);
             cellGrid[rowCount, columnCount] = cells[cellProgress];
+            cells[cellProgress].SetPosition();
 
             rowCount++;
             cellProgress++;         //Next cell or row depending if we've reached the end of this row
@@ -69,9 +70,6 @@ public class CellFinder : MonoBehaviour
             }
         }
 
-        if (mazeGenerator.generationSpeed > 0)
-            StartCoroutine(mazeGenerator.ApplyAlgorithmWait(cells[0], cellGrid));
-        else
-            mazeGenerator.ApplyAlgorithm(cells[0], cellGrid);
+        mazeGenerator.ApplyAlgorithm(cells[0], cellGrid);
     }
 }

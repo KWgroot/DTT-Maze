@@ -28,6 +28,16 @@ public class FindOpenCell : MonoBehaviour
         return unvisitedCells;
     }
 
+    public List<Cell> GetRandomCell(Cell currentCell, Cell[,] cellGrid, int mazeWidth, int mazeHeight)
+    {
+        if (this.cellGrid == null)
+            this.cellGrid = cellGrid; // Dont need duplicates
+
+        GetRandomCells(currentCell, mazeWidth, mazeHeight);
+
+        return unvisitedCells;
+    }
+
     /// <summary>
     /// Collects all valid neighbour cells to the current cell in a list.
     /// </summary>
@@ -74,6 +84,45 @@ public class FindOpenCell : MonoBehaviour
 
             if (cellSouth.visited == false)
                 unvisitedCells.Add(cellSouth);
+        }
+    }
+
+    public void GetRandomCells(Cell currentCell, int mazeWidth, int mazeHeight)
+    {
+        unvisitedCells.Clear();
+
+        int x = (int)currentCell.gridPos.x; //Due to setting up a much simpler grid we can now just check
+        int z = (int)currentCell.gridPos.y; //the positions of each cell in grid and find our neighbours.
+
+        if (cellGrid.Length <= 0)
+            return;
+
+        if (x + 1 < mazeWidth)                  
+        {
+            cellEast = cellGrid[x + 1, z];      
+
+            unvisitedCells.Add(cellEast);
+        }
+
+        if (x - 1 >= 0)
+        {
+            cellWest = cellGrid[x - 1, z];
+
+            unvisitedCells.Add(cellWest);
+        }
+
+        if (z + 1 < mazeHeight)
+        {
+            cellNorth = cellGrid[x, z + 1];
+
+            unvisitedCells.Add(cellNorth);
+        }
+
+        if (z - 1 >= 0)
+        {
+            cellSouth = cellGrid[x, z - 1];
+
+            unvisitedCells.Add(cellSouth);
         }
     }
 }

@@ -22,6 +22,12 @@ public class Cell
         visited = true;
     }
 
+    public void SetPosition()
+    {
+        position = (northWall.transform.position + eastWall.transform.position +
+            westWall.transform.position + southWall.transform.position) / 4;
+    }
+
     /// <summary>
     /// Set the position of the cell in the grid so it can be called for each cell.
     /// </summary>
