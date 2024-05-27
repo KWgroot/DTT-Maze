@@ -1372,7 +1372,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1734608211}
         m_TargetAssemblyTypeName: MazeGenerator, Assembly-CSharp
-        m_MethodName: SetSpeed
+        m_MethodName: SetAlgorithm
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
